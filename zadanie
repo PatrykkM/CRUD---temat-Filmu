@@ -1,0 +1,83 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace FilmApp.Controllers
+{
+    public class Film
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int Price { get; set; }
+    }
+
+    public class FilmController : Controller
+    {
+        private static IList<Film> films = new List<Film>
+        {
+            new Film { Id = 1, Name = "Film1", Description = "opis filmu1", Price = 3 },
+            new Film { Id = 2, Name = "Film2", Description = "opis filmu2", Price = 5 },
+            new Film { Id = 3, Name = "Film3", Description = "opis filmu3", Price = 3 }
+        };
+
+        public ActionResult Index()
+        {
+            return View(films);
+        }
+
+        public ActionResult Create()
+        {
+            return View(new Film());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(Film film)
+        {
+            film.Id = films.Count > 0 ? films.Max(f => f.Id) + 1 : 1;
+            films.Add(film);
+            return RedirectToAction(nameof(Index));
+        }
+
+        public ActionResult Details(int id)
+        {
+            var film = films.FirstOrDefault(x => x.Id == id);
+            if (film == null) return HttpNotFound();
+            return View(film);
+        }
+
+        public ActionResult Edit(int id)
+        {
+            var film = films.FirstOrDefault(x => x.Id == id);
+            if (film == null) return HttpNotFound();
+            return View(film);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(int id, Film film)
+        {
+            var existingFilm = films.FirstOrDefault(x => x.Id == id);
+            if (existingFilm != null)
+            {
+                existingFilm.Name = film.Name;
+                existingFilm.Description = film.Description;
+                existingFilm.Price = film.Price;
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        public ActionResult Delete(int id)
+        {
+            var film = films.FirstOrDefault(x => x.Id == id);
+            if (film != null)
+            {
+                films.Remove(film);
+            }
+            return RedirectToAction(nameof(Index));
+        }
+    }
+}
